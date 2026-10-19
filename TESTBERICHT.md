@@ -1,3 +1,22 @@
+# Abschlussprüfung · v0.6.1
+
+Die vom Nutzer tatsächlich getestete Fassung war laut Rückmeldung **v0.6.0-preview.1 über index.html**. Diese Vorschau hatte noch keinen Automodus; die unverändert manuelle Gesamtnahtlänge von 100 mm war dort erwartbar. Das ursprüngliche ZIP v0.6.0 wurde zusätzlich geprüft: app.js, model.js, index.html und sw.js stimmten bytegenau mit dem veröffentlichten PR-Stand überein.
+
+Bei der Untersuchung wurden zwei zusätzliche, unabhängig reproduzierbare Synchronisationsfehler in 0.6.0 gefunden: Nach Aktivierung von Auto nur über ein change-Ereignis blieb das Feld auf 100 mm und bearbeitbar; nach einer simulierten Browser-Wiederherstellung konnte ebenfalls ein alter Feldwert sichtbar bleiben. Der neue Regressionstest scheitert nachweislich am unveränderten 0.6.0-ZIP mit `100 != 120,00`. Nach der Korrektur bestehen alle 23 Assertions. Diese Tests lesen ausschließlich den sichtbaren UI-Zustand und rufen calculate() nicht selbst auf, damit fehlende Aktualisierungen nicht verdeckt werden. Ein tatsächliches Zurück-/Vorwärts-Navigieren wird zusätzlich geprüft.
+
+Vollständig ausgeführt: `npm run test:all` am 19.10.2026, gleiche Chromium-/Playwright-Umgebung wie unten:
+
+- 7 Modelltests bestanden.
+- 122 Basis-, 291 Darstellungs-, 124 Auto-/Verbrauchs- und 23 neue Synchronisations-Assertions bestanden: insgesamt **560 Browser-Assertions**.
+- Keine JavaScript-Browserfehler, Offline-Neuladen weiterhin erfolgreich.
+- 70 Screenshots einschließlich `screenshots/v0.6.1/auto-synchronized.png`.
+
+Referenz nach Aktivierung von Auto: 500 g Stahl, D=20 mm, B=60 mm, z=4 mm → Werkstücklänge 52,28 mm, zwei Nähte à 60 mm, Gesamtlänge 120,00 mm, Nahtmasse 7,54 g. Der Automodus folgt hier der Breite, weil diese größer als die berechnete Länge ist. Im manuellen Modus bleiben eigene Werte unverändert erhalten.
+
+Echte iPhone-/Safari-/Windows-Geräte bleiben ungeprüft; die Ursache der Vorschau-Verwechslung wird nicht als Browserfehler ausgegeben. Nachfolgend die historischen Berichte.
+
+---
+
 # Abschlussprüfung · v0.6.0
 
 Ausgeführt am 19.10.2026: `npm run test:all` mit Node.js 24.19.0, Playwright 1.56.1 und Chromium 154 unter Debian. Browserzugriff über lokale HTTP-Server auf 127.0.0.1.

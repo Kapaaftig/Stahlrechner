@@ -1,6 +1,12 @@
-# Stahlgewicht Rechner · v0.6.0
+# Stahlgewicht Rechner · v0.6.1
 
 Lokale, responsive Web-App zur Berechnung eines rechteckigen Werkstücks nach Zielgewicht. Ohne Laufzeitbibliotheken, Build-Schritt oder externe Ressourcen. Gewichtsmodell, Einheiten und Eingabeprüfung sind in `model.js`/`app.js` getrennt; Benutzerangaben verbleiben im Browser. Externe Quellen werden nur über ausdrücklich angeklickte Links geöffnet.
+
+## Versionshinweis
+
+`0.6.0-preview.1` war ausschließlich ein Darstellungsentwurf ohne Automodus. Für Auto muss die Kopf-/Fußzeile der Anwendung mindestens v0.6.0 anzeigen. v0.6.1 korrigiert zusätzlich die Synchronisierung bei reinen change-Ereignissen und bei vom Browser wiederhergestellten Formularwerten. Es wird dabei nur der sichtbare Formularzustand neu berechnet; die zuletzt gewählte Auto-/Manuell-Einstellung wird nicht überschrieben.
+
+Nach Entpacken einer neuen Version den alten lokalen Server beenden (Strg+C) und im **neuen** Projektordner starten. Für einen unabhängigen Test kann ein frischer Port, z. B. 8001, verwendet werden. So wird weder versehentlich aus einem alten Projektordner ausgeliefert noch der bisherige Service-Worker derselben Adresse verwendet.
 
 ## Start unter Windows
 

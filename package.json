@@ -1,13 +1,14 @@
 {
   "name": "stahlgewicht-rechner",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "scripts": {
     "test": "node tests/browser.cjs",
     "test:weld": "node tests/weld-preview.cjs",
     "test:model": "node --test tests/model.cjs",
     "test:auto": "node tests/auto.cjs",
-    "test:all": "npm run test:model && npm test && npm run test:weld && npm run test:auto"
+    "test:all": "npm run test:model && npm test && npm run test:weld && npm run test:auto && npm run test:sync",
+    "test:sync": "node tests/auto-sync.cjs"
   },
   "devDependencies": {
     "playwright": "1.56.1"

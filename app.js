@@ -520,7 +520,7 @@ $("reset").onclick = () => {
 $("copy").onclick = async () => {
   const r = calculate();
   if (!r.good) return;
-  const text = `Stahlgewicht Rechner v0.6.0\nMaterial: ${$("material").selectedOptions[0].textContent}\nGewicht: ${$("mass").value} ${prefs.units.mass}\nDicke: ${$("thick").value} ${prefs.units.thick}\nBreite: ${$("width").value} ${prefs.units.width}\nLänge: ${fmt(r.L / lf[prefs.units.length])} ${prefs.units.length}\nUmgerechnet: ${fmt(r.L / lf[prefs.units.secondary])} ${prefs.units.secondary}${$("weld").checked ? `\nNahtmodus: ${$("weldAuto").checked ? "Automatisch" : "Manuell"}\nGesamtnahtlänge: ${fmt(r.wl)} mm\nNahtmaß: ${$("weldSize").value} ${prefs.units.weldSize}\nNahtgewicht: ${fmt(r.weldKg * 1000)} g\nElektrode: ${$("electrodeSummary").textContent}\nVerbrauch: ${$("rodEstimate").textContent}\nAnnahmen: ${$("rodEstimateInfo").textContent}` : ""}`;
+  const text = `Stahlgewicht Rechner v0.6.1\nMaterial: ${$("material").selectedOptions[0].textContent}\nGewicht: ${$("mass").value} ${prefs.units.mass}\nDicke: ${$("thick").value} ${prefs.units.thick}\nBreite: ${$("width").value} ${prefs.units.width}\nLänge: ${fmt(r.L / lf[prefs.units.length])} ${prefs.units.length}\nUmgerechnet: ${fmt(r.L / lf[prefs.units.secondary])} ${prefs.units.secondary}${$("weld").checked ? `\nNahtmodus: ${$("weldAuto").checked ? "Automatisch" : "Manuell"}\nGesamtnahtlänge: ${fmt(r.wl)} mm\nNahtmaß: ${$("weldSize").value} ${prefs.units.weldSize}\nNahtgewicht: ${fmt(r.weldKg * 1000)} g\nElektrode: ${$("electrodeSummary").textContent}\nVerbrauch: ${$("rodEstimate").textContent}\nAnnahmen: ${$("rodEstimateInfo").textContent}` : ""}`;
   try {
     await navigator.clipboard.writeText(text);
     $("copy").textContent = "✓ Kopiert";
@@ -681,8 +681,9 @@ $("weldAuto").addEventListener("change", () => {
           (n * lf[manualWeldLength.unit]) / lf[prefs.units.weldLength],
         ).replace(".", ",")
       : manualWeldLength.text;
-    calculate();
   }
+  // The change event must update BOTH directions, even without a preceding input event.
+  calculate();
 });
 $("weldLength").addEventListener("input", () => {
   if (!$("weldAuto").checked)
@@ -691,3 +692,11 @@ $("weldLength").addEventListener("input", () => {
       unit: prefs.units.weldLength,
     };
 });
+
+// Browsers may restore checkbox/input state after scripts run or on Back/Forward navigation.
+function synchronizeWeldForm() {
+  $("weldFields").classList.toggle("hidden", !$("weld").checked);
+  calculate();
+}
+$("weld").addEventListener("change", synchronizeWeldForm);
+window.addEventListener("pageshow", synchronizeWeldForm);

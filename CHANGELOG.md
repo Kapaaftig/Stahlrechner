@@ -1,5 +1,13 @@
 # Änderungsprotokoll
 
+## v0.6.1 – Auto-Anzeige synchronisieren
+
+- Beide Umschaltrichtungen des Automodus berechnen beim change-Ereignis neu; das Feld bleibt nicht versehentlich bei manuellen 100 mm stehen.
+- Nach pageshow (einschließlich Zurück/Vorwärts) werden Feldzustände und Nahtwerte synchronisiert. Auch die Nahtaktivierung reagiert auf change.
+- Präcache lädt Dateien explizit mit cache=reload, statt auf mögliche HTTP-Cachewerte zurückzugreifen.
+- 23 neue Regression-Assertions prüfen ausschließlich den sichtbaren UI-Zustand, ohne calculate() aus dem Test aufzurufen.
+- Gesamtlauf: 7 Modelltests und 560 Browser-Assertions bestanden. Versionshinweis zur früheren 0.6.0-preview.1 ohne Auto ergänzt.
+
 ## v0.6.0 – Automatische Nahtlänge und Elektrodenverbrauch
 
 - Freigegebene Nahtdarstellung an der unteren sichtbaren Kante in Miniatur und Detail übernommen.

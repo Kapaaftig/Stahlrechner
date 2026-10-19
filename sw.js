@@ -1,5 +1,5 @@
 "use strict";
-const CACHE = "stahlgewicht-v0.6.0";
+const CACHE = "stahlgewicht-v0.6.1";
 const ASSETS = [
   "./",
   "./index.html",
@@ -16,7 +16,11 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(ASSETS))
+      .then((cache) =>
+        cache.addAll(
+          ASSETS.map((url) => new Request(url, { cache: "reload" })),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
