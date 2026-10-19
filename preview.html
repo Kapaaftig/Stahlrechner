@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nahtdarstellung – interaktiver Entwurf</title>
+    <style>
+      body {
+        margin: 0;
+        font: 16px system-ui;
+        background: #edf1f7;
+        color: #141a22;
+      }
+      main {
+        max-width: 1300px;
+        margin: auto;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 10px;
+      }
+      .controls {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        background: white;
+        padding: 16px;
+        border-radius: 16px;
+        margin: 18px 0;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+      }
+      select {
+        font: inherit;
+        padding: 9px;
+        border: 1px solid #a6b0be;
+        border-radius: 8px;
+      }
+      p {
+        line-height: 1.5;
+      }
+      section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      article {
+        min-width: 0;
+      }
+      h2 {
+        font-size: 18px;
+      }
+      iframe {
+        width: 100%;
+        height: 1250px;
+        border: 1px solid #c9d2df;
+        border-radius: 16px;
+        background: white;
+        box-sizing: border-box;
+      }
+      .note {
+        font-size: 14px;
+        color: #4a5666;
+      }
+      @media (max-width: 760px) {
+        section {
+          grid-template-columns: 1fr;
+        }
+        main {
+          padding: 12px;
+        }
+        iframe {
+          height: 1220px;
+        }
+      }
+    </style>
+    <script src="preview.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>Schweißnaht – Miniatur und Detailansicht testen</h1>
+      <p>
+        Darstellungsbeispiele für Version 0.6.0. Das Werkstück bleibt flach
+        liegen; die Naht sitzt am Fuß der sichtbaren Längsseite. Die verdeckte
+        Naht wird mitgerechnet und nicht gezeichnet.
+      </p>
+      <div class="controls">
+        <label
+          >Beispiel<select id="preset">
+            <option value="full">Durchgehend · 2 × 200 mm</option>
+            <option value="partial">Mittig · 2 × 80 mm</option>
+            <option value="thin">Dünn · 2 mm Werkstück, 4 mm Nahtmaß</option>
+            <option value="thin-partial">Dünn · mittige Teilnähte</option>
+          </select></label
+        ><label
+          >Farbschema<select id="scheme">
+            <option value="light">Hell</option>
+            <option value="dark">Dunkel</option>
+          </select></label
+        >
+      </div>
+      <p class="note">
+        Beispiele: Länge 200 mm, Breite 60 mm, Dicke 12 bzw. 2 mm. Das
+        Zielgewicht ist passend zum Beispiel vorbelegt. Die Beispiele verwenden
+        feste manuelle Gesamtnahtlängen; der Automodus kann in jeder Ansicht
+        eingeschaltet werden. Die optische Begrenzung ändert das Nahtgewicht
+        nicht. Felder in beiden Ansichten können unabhängig bedient werden.
+      </p>
+      <section>
+        <article>
+          <h2>Miniatur · zum Aufklappen antippen</h2>
+          <iframe
+            id="miniFrame"
+            title="Anwendung mit Werkstückminiatur"
+            src="index.html"
+          ></iframe>
+        </article>
+        <article>
+          <h2>Detailansicht · bestehende Ergebniskarte</h2>
+          <iframe
+            id="detailFrame"
+            title="Anwendung mit Werkstückdetails"
+            src="index.html"
+          ></iframe>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

@@ -15,6 +15,10 @@ const defaults = {
   rodLength: "350",
   dark: false,
   material: "7.85",
+  weldSize: 4,
+  stub: 50,
+  coreDensity: 7.85,
+  recoveries: {},
 };
 let prefs;
 try {
@@ -51,6 +55,34 @@ for (const [key, values] of Object.entries({
   if (!values.includes(prefs[key])) prefs[key] = defaults[key];
 }
 if (typeof prefs.dark !== "boolean") prefs.dark = false;
+for (const key of ["weldSize", "coreDensity"])
+  if (!Number.isFinite(prefs[key]) || prefs[key] <= 0)
+    prefs[key] = defaults[key];
+if (!Number.isFinite(prefs.stub) || prefs.stub < 0 || prefs.stub >= 450)
+  prefs.stub = 50;
+if (
+  !prefs.recoveries ||
+  typeof prefs.recoveries !== "object" ||
+  Array.isArray(prefs.recoveries)
+)
+  prefs.recoveries = {};
+for (const key of Object.keys(prefs.recoveries))
+  if (
+    ![
+      "120k",
+      "blau",
+      "gruen",
+      "spezial",
+      "therm19",
+      "therm25",
+      "custom",
+      "none",
+    ].includes(key) ||
+    !Number.isFinite(prefs.recoveries[key]) ||
+    prefs.recoveries[key] <= 0
+  )
+    delete prefs.recoveries[key];
+prefs.recoveries = { ...prefs.recoveries };
 const mf = { mg: 0.000001, g: 0.001, kg: 1, t: 1000 },
   lf = { mm: 1, cm: 10, m: 1000 };
 const electrodeNames = {
@@ -122,6 +154,7 @@ for (const id of ["rodLength", "defaultRodLength"])
   );
 function applyPrefs() {
   $("material").value = prefs.material;
+  $("defaultWeldSize").value = String(prefs.weldSize).replace(".", ",");
   unitRows.forEach(([k]) => ($("u_" + k).value = prefs.units[k]));
   $("defaultElectrode").value = prefs.electrode;
   $("defaultDiameter").value = prefs.diameter;
@@ -132,8 +165,10 @@ function applyPrefs() {
     `Gewünschtes Gesamtgewicht (${prefs.units.mass})`;
   $("thickLabel").textContent = `Dicke (${prefs.units.thick})`;
   $("widthLabel").textContent = `Breite (${prefs.units.width})`;
-  $("weldLengthLabel").textContent = `Nahtlänge (${prefs.units.weldLength})`;
-  $("weldSizeLabel").textContent = `Nahtmaß (${prefs.units.weldSize})`;
+  $("weldLengthLabel").textContent =
+    `Gesamtnahtlänge (${prefs.units.weldLength})`;
+  $("weldSizeLabel").textContent =
+    `${$("weldType").value === "fillet" ? "Schenkellänge z" : "Quadratseite s"} (${prefs.units.weldSize})`;
   calculate();
 }
 // One shared isometric geometry function, with a visual minimum for very thin dimensions.
@@ -191,15 +226,66 @@ function dimension(a, b, side, offset, color, label, textShift = 0) {
     text = add(mid, [unit[0] * (15 + textShift), unit[1] * (15 + textShift)]);
   return `<path class="measure" stroke="${color}" d="${line(s, e)} ${line(s, add(s, [-unit[0] * 10, -unit[1] * 10]))} ${line(e, add(e, [-unit[0] * 10, -unit[1] * 10]))}"/><text class="measuretext" x="${text[0]}" y="${text[1]}" fill="${color}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${(Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI},${text[0]},${text[1]})">${label}</text>`;
 }
-function draw(svgId, L, B, D, detail) {
+// Visual fillet on the visible lower longitudinal edge. Both sides remain in the mass model.
+function weldDrawing(g, L, B, D, weld) {
+  if (!weld || !(weld.length > 0) || !(weld.size > 0)) return "";
+  if (weld.axis === "width") {
+    g = { A: g.D, B: g.A, D: g.C, h: g.h };
+    [L, B] = [B, L];
+  }
+  const fraction = Math.min(1, weld.length / (2 * L));
+  const start = (1 - fraction) / 2,
+    end = 1 - start;
+  const z = Math.min(weld.size, D);
+  const height = (g.h * z) / D;
+  // Use the same projected axes as the workpiece; do not invent a larger minimum bead.
+  const out = [((g.A[0] - g.D[0]) * z) / B, ((g.A[1] - g.D[1]) * z) / B];
+  const edge = (t) => [
+    g.A[0] + (g.B[0] - g.A[0]) * t,
+    g.A[1] + (g.B[1] - g.A[1]) * t + g.h,
+  ];
+  const footS = edge(start),
+    footE = edge(end);
+  const topS = add(footS, [0, -height]),
+    topE = add(footE, [0, -height]);
+  const toeS = add(footS, out),
+    toeE = add(footE, out);
+  // Convex cross-section, extruded along the edge. This is a visual surface only.
+  const cS = add(topS, [out[0] * 0.65, out[1] * 0.65]);
+  const cE = add(topE, [out[0] * 0.65, out[1] * 0.65]);
+  const floor = [
+    add(g.A, [0, g.h]),
+    add(g.B, [0, g.h]),
+    add(toeE, [5, 4]),
+    add(toeS, [5, 4]),
+  ];
+  const surface = `${line(topS, topE)} Q${point(cE)} ${point(toeE)} L${point(toeS)} Q${point(cS)} ${point(topS)} Z`;
+  const cap = `${line(footS, topS)} Q${point(cS)} ${point(toeS)} Z`;
+  return {
+    floor: `<polygon class="weld-ground" points="${poly(floor)}"/>`,
+    seam: `<g class="weld-seam" data-fraction="${fraction}" data-height="${height}" data-size="${z}"><path class="weld-surface" d="${surface}"/><path class="weld-end" d="${cap}"/><path class="weld-highlight" d="${line(topS, topE)}"/></g>`,
+  };
+}
+function draw(svgId, L, B, D, detail, weld = null) {
   const box = detail
       ? { x: 88, y: 72, w: 170, h: 112 }
       : { x: 16, y: 16, w: 188, h: 110 },
     g = geometry(L, B, D, box),
     { A, B: Q, C, D: S, h } = g;
   const shape = `<g class="shape"><polygon points="${poly([A, S, add(S, [0, h]), add(A, [0, h])])}" fill="#72859a"/><polygon points="${poly([A, Q, add(Q, [0, h]), add(A, [0, h])])}" fill="#94a9bd"/><polygon points="${poly([A, Q, C, S])}" fill="#c5d1de"/></g>`;
+  const bead = weldDrawing(g, L, B, D, weld);
+  const assembly = `<g class="assembly">${bead ? bead.floor : ""}${shape}${bead ? bead.seam : ""}</g>`;
   if (!detail) {
-    $(svgId).innerHTML = shape;
+    $(svgId).innerHTML = assembly;
+    if (bead) {
+      const group = $(svgId).querySelector(".assembly"),
+        bounds = group.getBBox();
+      const scale = Math.min(1, 204 / bounds.width, 129 / bounds.height);
+      group.setAttribute(
+        "transform",
+        `translate(110 71) scale(${scale}) translate(${-bounds.x - bounds.width / 2} ${-bounds.y - bounds.height / 2})`,
+      );
+    }
     return;
   }
   const measureFmt = (v) =>
@@ -210,7 +296,7 @@ function draw(svgId, L, B, D, detail) {
     widthLabel = "B " + measureFmt(B) + " mm",
     thickLabel = "D " + measureFmt(D) + " mm"; // Width is offset from the visible left edge, close to the body; thickness uses the same dimension function.
   $(svgId).innerHTML =
-    shape +
+    assembly +
     dimension(S, C, -1, 18, "var(--measure-length)", lenLabel) +
     dimension(
       add(S, [0, h]),
@@ -232,33 +318,39 @@ function calculate() {
   const kg = parse($("mass").value) * mf[prefs.units.mass],
     d = parse($("thick").value) * lf[prefs.units.thick],
     b = parse($("width").value) * lf[prefs.units.width],
-    wl = parse($("weldLength").value) * lf[prefs.units.weldLength],
+    manualLength = parse($("weldLength").value) * lf[prefs.units.weldLength],
     ws = parse($("weldSize").value) * lf[prefs.units.weldSize],
     density = Number($("material").value),
-    weld = $("weld").checked;
-  const validWeld =
-    !weld || (Number.isFinite(wl) && wl >= 0 && Number.isFinite(ws) && ws > 0);
-  const weldKg =
-    weld && validWeld
-      ? (($("weldType").value === "fillet" ? 0.5 : 1) *
-          wl *
-          ws *
-          ws *
-          density) /
-        1e6
-      : 0;
-  let good =
-    [kg, d, b].every((v) => Number.isFinite(v) && v > 0) &&
-    validWeld &&
-    kg > weldKg;
-  let L = good ? ((kg - weldKg) * 1e6) / (d * b * density) : 0;
-  good =
-    good &&
-    Number.isFinite(L) &&
-    L > 0 &&
-    Number.isFinite(weldKg * 1000) &&
-    (!weld || wl === 0 || weldKg > 0);
-  if (!good) L = 0;
+    weld = $("weld").checked,
+    auto = $("weldAuto").checked;
+  const result = WeldModel.workpiece({
+    massKg: kg,
+    thickness: d,
+    width: b,
+    density,
+    weld,
+    auto,
+    weldLength: manualLength,
+    weldSize: ws,
+    model: $("weldType").value,
+  });
+  const { good, L, weldKg, wl, axis } = result;
+  $("weldLength").readOnly = auto;
+  if (auto)
+    $("weldLength").value =
+      good && weld
+        ? (wl / lf[prefs.units.weldLength]).toLocaleString("de-DE", {
+            useGrouping: false,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : "";
+  $("weldAutoInfo").textContent = auto
+    ? good && weld
+      ? `2 × ${fmt(wl / 2)} mm · entlang der ${axis === "width" ? "Breite (längere Kante)" : "Länge"}`
+      : "Zwei durchgehende Nähte an den längeren Kanten."
+    : "Gesamtlänge beider Nähte eingeben; je eine Hälfte wird mittig angeordnet.";
+  updateWeldSymbol(ws);
   $("primaryCompact").textContent = $("primaryDetail").textContent = good
     ? fmt(L / lf[prefs.units.length])
     : "—";
@@ -273,14 +365,23 @@ function calculate() {
   $("validIcon").style.color = good ? "#168044" : "#c44040";
   $("status").textContent = good
     ? "✓ Berechnung erfolgreich"
-    : validWeld && weld && kg <= weldKg
-      ? "Das Nahtgewicht muss kleiner als das Gesamtgewicht sein."
-      : "Bitte positive, endliche Maße und Gewicht eingeben; Nahtlänge darf null sein.";
+    : result.error === "tooLong"
+      ? "Die Gesamtnahtlänge passt nicht auf beide längeren Kanten."
+      : weld && result.error === "range"
+        ? "Für diese Naht ist kein positives Werkstück mit dem Zielgewicht möglich."
+        : "Bitte positive, endliche Maße und Gewicht eingeben; manuelle Nahtlänge darf null sein.";
   for (const [id, ok] of [
     ["mass", kg > 0 && Number.isFinite(kg)],
     ["thick", d > 0 && Number.isFinite(d)],
     ["width", b > 0 && Number.isFinite(b)],
-    ["weldLength", !weld || (Number.isFinite(wl) && wl >= 0)],
+    [
+      "weldLength",
+      !weld ||
+        auto ||
+        (Number.isFinite(manualLength) &&
+          manualLength >= 0 &&
+          result.error !== "tooLong"),
+    ],
     ["weldSize", !weld || (Number.isFinite(ws) && ws > 0)],
   ])
     $(id).setAttribute("aria-invalid", String(!ok));
@@ -289,9 +390,19 @@ function calculate() {
   $("electrodeSummary").textContent =
     `Ø ${$("diameter").value.replace(".", ",")} mm · ${$("electrode").value === "custom" ? $("customElectrode").value || "Eigene Sorte" : electrodeNames[$("electrode").value]}`;
   $("customWrap").classList.toggle("hidden", $("electrode").value !== "custom");
-  draw("miniSvg", good ? L : 60, good ? b : 60, good ? d : 20, false);
-  draw("detailSvg", good ? L : 60, good ? b : 60, good ? d : 20, true);
-  return { good, L, b, d, kg, weldKg };
+  const bead = good && weld ? { length: wl, size: ws, axis } : null;
+  const notes = [];
+  if (bead && ws > d)
+    notes.push(
+      "Nahthöhe nur in der Zeichnung auf die Werkstückdicke begrenzt; Gewicht unverändert.",
+    );
+
+  $("weldDrawingNote").textContent = notes.join(" ");
+  $("weldDrawingNote").classList.toggle("hidden", !notes.length);
+  draw("miniSvg", good ? L : 60, good ? b : 60, good ? d : 20, false, bead);
+  draw("detailSvg", good ? L : 60, good ? b : 60, good ? d : 20, true, bead);
+  const estimate = updateConsumption(good, weld, weldKg);
+  return { good, L, b, d, kg, weldKg, wl, axis, estimate };
 }
 for (const id of [
   "mass",
@@ -302,6 +413,7 @@ for (const id of [
   "weldLength",
   "weldSize",
   "weldType",
+  "weldAuto",
   "electrode",
   "diameter",
   "rodLength",
@@ -314,6 +426,7 @@ for (const id of [
     }
     if (id === "weld")
       $("weldFields").classList.toggle("hidden", !$("weld").checked);
+    if (id === "electrode") syncRecovery();
     calculate();
   });
 $("electrodeToggle").onclick = () => {
@@ -382,6 +495,7 @@ for (const [id, key] of [
   $(id).addEventListener("change", (e) => {
     prefs[key] = e.target.value;
     $(key).value = prefs[key];
+    if (key === "electrode") syncRecovery();
     save();
     applyPrefs();
   });
@@ -397,13 +511,16 @@ $("reset").onclick = () => {
   prefs = structuredClone(defaults);
   for (const key of ["electrode", "diameter", "rodLength"])
     $(key).value = prefs[key];
+  $("stub").value = prefs.stub;
+  $("coreDensity").value = prefs.coreDensity;
+  syncRecovery();
   save();
   applyPrefs();
 };
 $("copy").onclick = async () => {
   const r = calculate();
   if (!r.good) return;
-  const text = `Stahlgewicht Rechner v0.5.2\nMaterial: ${$("material").selectedOptions[0].textContent}\nGewicht: ${$("mass").value} ${prefs.units.mass}\nDicke: ${$("thick").value} ${prefs.units.thick}\nBreite: ${$("width").value} ${prefs.units.width}\nLänge: ${fmt(r.L / lf[prefs.units.length])} ${prefs.units.length}\nUmgerechnet: ${fmt(r.L / lf[prefs.units.secondary])} ${prefs.units.secondary}${$("weld").checked ? `\nNahtgewicht: ${fmt(r.weldKg * 1000)} g\nElektrode: ${$("electrodeSummary").textContent}` : ""}`;
+  const text = `Stahlgewicht Rechner v0.6.0\nMaterial: ${$("material").selectedOptions[0].textContent}\nGewicht: ${$("mass").value} ${prefs.units.mass}\nDicke: ${$("thick").value} ${prefs.units.thick}\nBreite: ${$("width").value} ${prefs.units.width}\nLänge: ${fmt(r.L / lf[prefs.units.length])} ${prefs.units.length}\nUmgerechnet: ${fmt(r.L / lf[prefs.units.secondary])} ${prefs.units.secondary}${$("weld").checked ? `\nNahtmodus: ${$("weldAuto").checked ? "Automatisch" : "Manuell"}\nGesamtnahtlänge: ${fmt(r.wl)} mm\nNahtmaß: ${$("weldSize").value} ${prefs.units.weldSize}\nNahtgewicht: ${fmt(r.weldKg * 1000)} g\nElektrode: ${$("electrodeSummary").textContent}\nVerbrauch: ${$("rodEstimate").textContent}\nAnnahmen: ${$("rodEstimateInfo").textContent}` : ""}`;
   try {
     await navigator.clipboard.writeText(text);
     $("copy").textContent = "✓ Kopiert";
@@ -420,6 +537,157 @@ for (const key of ["mass", "thick", "width", "weldLength", "weldSize"]) {
     (parse($(key).value) * f[defaults.units[key]]) / f[prefs.units[key]],
   ).replace(".", ",");
 }
+$("weldSize").value = String(prefs.weldSize / lf[prefs.units.weldSize]).replace(
+  ".",
+  ",",
+);
+$("stub").value = prefs.stub;
+$("coreDensity").value = String(prefs.coreDensity).replace(".", ",");
+syncRecovery();
 applyPrefs();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
   navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+function updateWeldSymbol(size) {
+  const fillet = $("weldType").value === "fillet";
+  $("weldSizeLabel").textContent =
+    `${fillet ? "Schenkellänge z" : "Quadratseite s"} (${prefs.units.weldSize})`;
+  $("weldSizeInfo").textContent = fillet
+    ? `z ist die Schenkellänge, nicht das a-Maß.${Number.isFinite(size) && size > 0 ? " Bei z = " + fmt(size) + " mm gilt a ≈ " + fmt(size / Math.SQRT2) + " mm." : ""}`
+    : "Vereinfachter Quadratquerschnitt s × s; keine genormte Nahtform.";
+  $("weldSymbol").setAttribute(
+    "aria-label",
+    fillet
+      ? "Kehlnaht im Querschnitt: zwei Werkstücke, dreieckige Naht und geneigte Elektrode"
+      : "Vereinfachtes Quadratmodell: zwei Werkstücke, quadratische Naht und geneigte Elektrode",
+  );
+  $("weldSymbol").innerHTML =
+    `<rect class="symbol-part" x="12" y="66" width="154" height="16" rx="1"/><rect class="symbol-part" x="31" y="12" width="28" height="54" rx="1"/><path class="symbol-weld" d="${fillet ? "M59 66V42L83 66Z" : "M59 66V42H83V66Z"}"/><path class="symbol-electrode" d="M122 12L83 49"/><path class="symbol-core" d="M118 16L79 53"/><path class="symbol-arc" d="M77 56L73 60"/><text x="103" y="78">${fillet ? "z" : "s"}</text><text x="106" y="96">${fillet ? "Kehlnaht" : "Modell"}</text>`;
+}
+function recoveryDefault() {
+  return $("electrode").value === "120k" ? 120 : 100;
+}
+function syncRecovery() {
+  const key = $("electrode").value;
+  $("recovery").value = String(
+    prefs.recoveries[key] ?? recoveryDefault(),
+  ).replace(".", ",");
+}
+function updateConsumption(good, weld, weldKg) {
+  $("consumption").classList.toggle("hidden", !weld);
+  const key = $("electrode").value,
+    overridden = Object.hasOwn(prefs.recoveries, key);
+  const source =
+    "https://www.voestalpine.com/division_stahl/content/download/51677/647045/file/voestalpine_Bohler_Welding_Welding_Consumables_Pipeline_Folder.pdf";
+  $("recoverySource").replaceChildren();
+  if (overridden)
+    $("recoverySource").textContent =
+      "Ausbringung: eigene Angabe, keine geprüfte Herstellerfreigabe.";
+  else if (key === "120k") {
+    $("recoverySource").append(
+      "PHOENIX 120 K: 120 % laut älterem Herstellerkatalog, Seite 28. Aktuelles Produktdatenblatt prüfen. ",
+    );
+    const link = document.createElement("a");
+    link.href = source;
+    link.textContent = "Quelle";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    $("recoverySource").append(link);
+  } else
+    $("recoverySource").textContent =
+      "Ausbringung: 100 % als unbestätigte Rechenannahme. Für diese Sorte ist kein Kennwert hinterlegt.";
+  const recovery = parse($("recovery").value),
+    stub = parse($("stub").value),
+    coreDensity = parse($("coreDensity").value);
+  const estimate = WeldModel.consumption({
+    weldKg,
+    diameter: Number($("diameter").value),
+    rodLength: Number($("rodLength").value),
+    stub,
+    recovery,
+    coreDensity,
+  });
+  for (const [id, ok] of [
+    ["recovery", Number.isFinite(recovery) && recovery > 0],
+    [
+      "stub",
+      Number.isFinite(stub) && stub >= 0 && stub < Number($("rodLength").value),
+    ],
+    ["coreDensity", Number.isFinite(coreDensity) && coreDensity > 0],
+  ])
+    $(id).setAttribute("aria-invalid", String(!ok));
+  if (!good || !estimate.good) {
+    $("rodEstimate").textContent = "—";
+    $("rodEstimateInfo").textContent = good
+      ? "Verbrauch nicht berechenbar: Ausbringung und Dichte müssen positiv sein; Reststück muss kürzer als der Stab sein."
+      : "Verbrauch erst bei gültiger Nahtberechnung.";
+    return { good: false };
+  }
+  $("rodEstimate").textContent =
+    `ca. ${fmt(estimate.rods)} Stäbe · ${estimate.prepare.toLocaleString("de-DE")} bereithalten`;
+  $("rodEstimateInfo").textContent =
+    `${$("diameter").value.replace(".", ",")} × ${$("rodLength").value} mm · insgesamt ca. ${fmt(estimate.burnedMM)} mm Kernstab abschmelzen. Annahmen: ${fmt(recovery)} % Ausbringung, ${fmt(stub)} mm Rest je Stab, Dichte ${fmt(coreDensity)} g/cm³. ${overridden ? "Eigene Ausbringungsangabe." : key === "120k" ? "Ausbringung aus älterem Katalog." : "Ausbringung unbestätigt."} Kein Nachweis der erreichten Nahtgröße.`;
+  return estimate;
+}
+for (const [id, key] of [
+  ["stub", "stub"],
+  ["coreDensity", "coreDensity"],
+])
+  $(id).addEventListener("input", () => {
+    const n = parse($(id).value);
+    if (
+      Number.isFinite(n) &&
+      (key === "stub" ? n >= 0 && n < Number($("rodLength").value) : n > 0)
+    ) {
+      prefs[key] = n;
+      save();
+    }
+    calculate();
+  });
+$("recovery").addEventListener("input", () => {
+  const n = parse($("recovery").value);
+  if (Number.isFinite(n) && n > 0) {
+    prefs.recoveries[$("electrode").value] = n;
+    save();
+  }
+  calculate();
+});
+$("recoveryReset").onclick = () => {
+  delete prefs.recoveries[$("electrode").value];
+  syncRecovery();
+  save();
+  calculate();
+};
+$("defaultWeldSize").addEventListener("input", () => {
+  const n = parse($("defaultWeldSize").value),
+    ok = Number.isFinite(n) && n > 0;
+  $("defaultWeldSize").setAttribute("aria-invalid", String(!ok));
+  if (ok) {
+    prefs.weldSize = n;
+    $("weldSize").value = String(n / lf[prefs.units.weldSize]).replace(
+      ".",
+      ",",
+    );
+    save();
+    calculate();
+  }
+});
+let manualWeldLength = { text: "100", unit: "mm" };
+$("weldAuto").addEventListener("change", () => {
+  if (!$("weldAuto").checked) {
+    const n = parse(manualWeldLength.text);
+    $("weldLength").value = Number.isFinite(n)
+      ? String(
+          (n * lf[manualWeldLength.unit]) / lf[prefs.units.weldLength],
+        ).replace(".", ",")
+      : manualWeldLength.text;
+    calculate();
+  }
+});
+$("weldLength").addEventListener("input", () => {
+  if (!$("weldAuto").checked)
+    manualWeldLength = {
+      text: $("weldLength").value,
+      unit: prefs.units.weldLength,
+    };
+});

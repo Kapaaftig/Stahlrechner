@@ -1,10 +1,11 @@
 "use strict";
-const CACHE = "stahlgewicht-v0.5.2";
+const CACHE = "stahlgewicht-v0.6.0";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./model.js",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-192.png",
