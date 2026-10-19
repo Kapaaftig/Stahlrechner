@@ -47,11 +47,28 @@ main {
   margin: 0;
   flex: 1;
 }
-.weight-logo {width:28px;height:28px;flex:0 0 28px;color:var(--ink)}
-.weight-body{fill:currentColor;stroke:none;stroke-linejoin:round;stroke-width:2.5}
-.weight-label{fill:var(--bg)}
-body.dark .weight-body{fill:none;stroke:currentColor}
-body.dark .weight-label{fill:currentColor}
+.weight-logo {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  color: var(--ink);
+}
+.weight-body {
+  fill: currentColor;
+  stroke: none;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+.weight-label {
+  fill: var(--bg);
+}
+body.dark .weight-body {
+  fill: none;
+  stroke: currentColor;
+}
+body.dark .weight-label {
+  fill: currentColor;
+}
 .iconbutton {
   height: 39px;
   width: 39px;
@@ -323,4 +340,102 @@ body.dark {
   --measure-length: #79aeff;
   --measure-width: #55ded5;
   --measure-thick: #ffc077;
+}
+
+/* Preview: no texture or minimum bead size, to retain workpiece proportions. */
+.weld-ground {
+  fill: #64748b;
+  opacity: 0.1;
+  stroke: none;
+}
+.weld-surface {
+  fill: #b9a17c;
+  stroke: #736048;
+  stroke-width: 0.55;
+  stroke-linejoin: round;
+}
+.weld-end {
+  fill: #8d7757;
+  stroke: #736048;
+  stroke-width: 0.55;
+}
+.weld-highlight {
+  fill: none;
+  stroke: #e6d6b9;
+  stroke-width: 0.65;
+  stroke-linecap: round;
+}
+body.dark .weld-surface {
+  fill: #cab58e;
+  stroke: #8f795b;
+}
+body.dark .weld-end {
+  fill: #aa9069;
+}
+.weld-model-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 12px;
+  align-items: center;
+}
+#weldSymbol {
+  width: 120px;
+  height: auto;
+  color: var(--ink);
+}
+.symbol-part {
+  fill: #9bafc2;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.symbol-weld {
+  fill: #c7ab7c;
+  stroke: #806a49;
+  stroke-width: 1.4;
+}
+.symbol-electrode {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.symbol-core {
+  fill: none;
+  stroke: #9bafc2;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.symbol-arc {
+  stroke: #d89332;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#weldSymbol text {
+  fill: var(--ink);
+  font: 12px system-ui;
+}
+input[readonly] {
+  background: var(--bg);
+  color: var(--muted);
+}
+#rodEstimate {
+  display: block;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+}
+#estimateDetails summary {
+  cursor: pointer;
+  font-size: 14px;
+}
+#estimateDetails a {
+  color: var(--measure-length);
+}
+@media (max-width: 360px) {
+  .weld-model-row {
+    grid-template-columns: minmax(0, 1fr) 88px;
+    gap: 8px;
+  }
+  #weldSymbol {
+    width: 88px;
+  }
 }

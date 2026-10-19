@@ -20,7 +20,29 @@
   <body>
     <main>
       <header class="header">
-        <svg class="weight-logo" viewBox="0 0 64 64" role="img" aria-label="Gewicht mit kg-Symbol"><path class="weight-body" fill-rule="evenodd" d="M20 5H44a8 8 0 0 1 0 16h-3v5h8a6 6 0 0 1 5.7 4.2l7 22A6 6 0 0 1 56 60H8a6 6 0 0 1-5.7-7.8l7-22A6 6 0 0 1 15 26h8v-5h-3a8 8 0 0 1 0-16Z M20 11a2 2 0 0 0 0 4h24a2 2 0 0 0 0-4Z"/><text class="weight-label" x="32" y="49" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="800">kg</text></svg>
+        <svg
+          class="weight-logo"
+          viewBox="0 0 64 64"
+          role="img"
+          aria-label="Gewicht mit kg-Symbol"
+        >
+          <path
+            class="weight-body"
+            fill-rule="evenodd"
+            d="M20 5H44a8 8 0 0 1 0 16h-3v5h8a6 6 0 0 1 5.7 4.2l7 22A6 6 0 0 1 56 60H8a6 6 0 0 1-5.7-7.8l7-22A6 6 0 0 1 15 26h8v-5h-3a8 8 0 0 1 0-16Z M20 11a2 2 0 0 0 0 4h24a2 2 0 0 0 0-4Z"
+          />
+          <text
+            class="weight-label"
+            x="32"
+            y="49"
+            text-anchor="middle"
+            font-family="Arial, sans-serif"
+            font-size="28"
+            font-weight="800"
+          >
+            kg
+          </text>
+        </svg>
         <h1>Stahlgewicht Rechner</h1>
         <button id="theme" class="iconbutton" aria-label="Darstellung wechseln">
           ☼</button
@@ -57,9 +79,14 @@
             ><select id="defaultRodLength"></select>
           </div>
         </div>
+        <div class="field">
+          <label for="defaultWeldSize"
+            >Standard-Nahtmaß (mm, Beispielwert)</label
+          ><input id="defaultWeldSize" inputmode="decimal" value="4" />
+        </div>
         <button class="secondary" id="reset">Standardeinstellungen</button>
         <div class="footer">
-          Stahlgewicht Rechner · v0.5.2 – Geometrie & Einstellungen
+          Stahlgewicht Rechner · v0.6.1 – Geometrie & Einstellungen
         </div>
       </section>
       <p class="note" role="status" id="storageNotice"></p>
@@ -96,19 +123,32 @@
             ><input type="checkbox" id="weld"
           /></label>
           <div id="weldFields" class="hidden">
-            <div class="field">
-              <label for="weldType">Nahtmodell</label
-              ><select id="weldType">
-                <option value="fillet">Kehlnaht (Schenkellänge z)</option>
-                <option value="rectangle">
-                  Quadratquerschnitt (vereinfacht)
-                </option>
-              </select>
+            <label class="switchrow" for="weldAuto"
+              ><span>Nahtlänge automatisch</span
+              ><input type="checkbox" id="weldAuto" checked
+            /></label>
+            <p class="note" id="weldAutoInfo">
+              Zwei durchgehende Nähte an den längeren Kanten.
+            </p>
+            <div class="weld-model-row">
+              <div class="field">
+                <label for="weldType">Nahtmodell</label
+                ><select id="weldType">
+                  <option value="fillet">Kehlnaht · z</option>
+                  <option value="rectangle">Quadratmodell · s</option>
+                </select>
+              </div>
+              <svg
+                id="weldSymbol"
+                viewBox="0 0 180 100"
+                role="img"
+                aria-label="Nahtmodell mit zwei Werkstücken und Elektrode"
+              ></svg>
             </div>
             <div class="cols">
               <div class="field">
                 <label id="weldLengthLabel" for="weldLength"
-                  >Nahtlänge (mm)</label
+                  >Gesamtnahtlänge (mm)</label
                 ><input id="weldLength" inputmode="decimal" value="100" />
               </div>
               <div class="field">
@@ -116,6 +156,7 @@
                 ><input id="weldSize" inputmode="decimal" value="4" />
               </div>
             </div>
+            <p class="note" id="weldSizeInfo"></p>
             <div class="between">
               <div>
                 <strong>Stabelektrode</strong>
@@ -149,11 +190,10 @@
               </div>
             </div>
             <p class="note">
-              Die Sorte dokumentiert die Auswahl. Das Schweißgutgewicht wird
-              geometrisch geschätzt; Elektrodenverbrauch und Ausbringung werden
-              nicht berechnet. Sortenbezeichnungen sind ungeprüft; es sind keine
-              Herstellerdaten hinterlegt. Die Dichte des Schweißguts wird wie
-              die des Werkstücks angenommen.
+              Nahtmaß und Elektroden-Ø sind unabhängig. 4 mm ist ein
+              Beispielwert, keine Schweißempfehlung. Die Nahtmasse verwendet
+              näherungsweise die Werkstoffdichte. Elektrodeneignung anhand
+              Produktdatenblatt prüfen.
             </p>
           </div>
         </section>
@@ -201,6 +241,7 @@
               <span id="primaryUnitDetail" class="unit"></span>
             </div>
           </div>
+          <p id="weldDrawingNote" class="note hidden" role="status"></p>
           <div class="line"></div>
           <div class="between">
             <span class="small">Umgerechnet</span
@@ -210,14 +251,48 @@
             <span class="small">Geschätztes Nahtgewicht</span
             ><strong id="weldMass"></strong>
           </div>
+          <div id="consumption" class="hidden">
+            <div class="line"></div>
+            <div class="small">ELEKTRODENVERBRAUCH · SCHÄTZUNG</div>
+            <strong id="rodEstimate"></strong>
+            <p class="note" id="rodEstimateInfo"></p>
+            <details id="estimateDetails">
+              <summary>Rechenannahmen anpassen</summary>
+              <div class="cols">
+                <div class="field">
+                  <label for="recovery">Ausbringung zum Kernstab (%)</label
+                  ><input id="recovery" inputmode="decimal" value="120" />
+                </div>
+                <div class="field">
+                  <label for="stub">Reststück je Stab (mm)</label
+                  ><input id="stub" inputmode="decimal" value="50" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="coreDensity">Kernstabdichte (g/cm³)</label
+                ><input id="coreDensity" inputmode="decimal" value="7,85" />
+              </div>
+              <p class="note" id="recoverySource"></p>
+              <button type="button" class="secondary" id="recoveryReset">
+                Ausbringung zurücksetzen
+              </button>
+              <p class="note">
+                Reststück 50 mm und Kernstabdichte 7,85 sind anpassbare
+                Modellannahmen, keine sortenspezifischen Herstellerwerte. Die
+                Stabzahl ist eine rechnerische Orientierung, kein Nachweis für
+                Nahtgröße oder Festigkeit.
+              </p>
+            </details>
+          </div>
           <div role="status" aria-live="polite" id="status" class="status">
             ✓ Berechnung erfolgreich
           </div>
         </section>
         <button class="copy" id="copy">▢ &nbsp; Ergebnis kopieren</button>
-        <div class="footer">Stahlgewicht Rechner · v0.5.2</div>
+        <div class="footer">Stahlgewicht Rechner · v0.6.1</div>
       </div>
     </main>
+    <script src="model.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>
