@@ -9,13 +9,14 @@
     <meta name="theme-color" content="#eef2f7" />
     <meta
       name="description"
-      content="Stahlgewicht und Werkstücklänge berechnen"
+      content="Wuchtgewichte berechnen und das Betriebswuchten verstehen"
     />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <title>Stahlgewicht Rechner</title>
+    <title>Wuchtgewicht Rechner</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="guide.css" />
   </head>
   <body>
     <main>
@@ -43,7 +44,7 @@
             kg
           </text>
         </svg>
-        <h1>Stahlgewicht Rechner</h1>
+        <div class="brand"><h1>Wuchtgewicht Rechner</h1><span class="brand-subtitle">GEWICHT BERECHNEN. WUCHTEN VERSTEHEN.</span></div>
         <button id="theme" class="iconbutton" aria-label="Darstellung wechseln">
           ☼</button
         ><button
@@ -56,6 +57,11 @@
           ⚙
         </button>
       </header>
+      <div class="app-tabs" role="tablist" aria-label="App-Bereiche">
+        <button id="tab-rechner" role="tab" aria-selected="true" aria-controls="panel-rechner" tabindex="0">Rechner</button>
+        <button id="tab-wuchten" role="tab" aria-selected="false" aria-controls="panel-wuchten" tabindex="-1">Wuchten verstehen</button>
+      </div>
+      <section id="panel-rechner" role="tabpanel" aria-labelledby="tab-rechner">
       <section id="settings" class="card hidden">
         <div class="between">
           <h2 style="margin: 0; font-size: 19px">Einstellungen</h2>
@@ -86,7 +92,7 @@
         </div>
         <button class="secondary" id="reset">Standardeinstellungen</button>
         <div class="footer">
-          Stahlgewicht Rechner · v0.6.1 – Geometrie & Einstellungen
+          Wuchtgewicht Rechner · v0.7.0 – Einstellungen
         </div>
       </section>
       <p class="note" role="status" id="storageNotice"></p>
@@ -289,10 +295,123 @@
           </div>
         </section>
         <button class="copy" id="copy">▢ &nbsp; Ergebnis kopieren</button>
-        <div class="footer">Stahlgewicht Rechner · v0.6.1</div>
+        <div class="footer">Wuchtgewicht Rechner · v0.7.0</div>
       </div>
+      </section>
+      <section id="panel-wuchten" role="tabpanel" aria-labelledby="tab-wuchten" hidden>
+  <div class="guide-intro">
+    <p class="eyebrow">BETRIEBSWUCHTEN · GRUNDLAGEN</p>
+    <h2>Vom Messlauf zum<br>passenden Ausgleich.</h2>
+    <p>Ein verständlicher Überblick über Messung, Prüfgewicht und Korrektur – mit und ohne Phasenmessung.</p>
+    <div class="guide-tags"><span>AS · Antriebsseite</span><span>NS · Nebenseite</span><span>Schwinggeschwindigkeit · mm/s</span></div>
+  </div>
+
+  <figure class="setup-figure">
+    <button class="image-open" data-image="images/01-messstellen-as-ns.png" data-caption="Messstellen am Gebläseläufer" aria-label="Prinzipschema der Messstellen vergrößern">
+      <img src="images/01-messstellen-as-ns.png" width="1536" height="1024" alt="Radialgebläseläufer zwischen NS- und AS-Lager, Kupplung und Motor. Aufnehmer an den Lagergehäusen und optischer Geber an der Welle; Stirnansicht mit horizontaler und vertikaler Messrichtung.">
+      <span class="image-hint">⤢ Bild vergrößern</span>
+    </button>
+    <figcaption>Prinzipschema. Einbauanordnung und Messstellen können abweichen. Schutzgehäuse sind zur Erklärung ausgeblendet.</figcaption>
+  </figure>
+
+  <div class="reading-heading"><h3>Welcher Ablauf ist gefragt?</h3><span>Abschnitt auswählen</span></div>
+  <div class="route-cards">
+    <button data-open="method-a"><span class="route-symbol">A</span><strong>Mit Wuchtmessgerät</strong><span>Amplitude und Phase</span><span class="route-arrow" aria-hidden="true">↗</span></button>
+    <button data-open="method-b"><span class="route-symbol">B</span><strong>Ohne Phasenmessung</strong><span>Geeignetes Vierlaufverfahren</span><span class="route-arrow" aria-hidden="true">↗</span></button>
+    <button data-open="no-run" class="route-problem"><span class="route-symbol">!</span><strong>Kein stabiler Lauf</strong><span>Hochlauf oder Messung abgebrochen</span><span class="route-arrow" aria-hidden="true">↗</span></button>
+  </div>
+
+  <aside class="target-card">
+    <div class="target-value"><span class="eyebrow">BETRIEBLICHES BEISPIELZIEL</span><strong>&lt; 1,00 <small>mm/s</small></strong></div>
+    <p>Das Ziel gilt für die festgelegten Messkanäle und Betriebsbedingungen. Messgröße, Filter und Amplitudendefinition gehören dazu. Der Wert ist kein allgemeiner Grenzwert und ersetzt keine Betriebsfreigabe.</p>
+  </aside>
+
+  <div class="guide-sections">
+    <details class="guide-section" id="method-a" open>
+      <summary><span class="section-symbol">A</span><span><strong>Mit Wuchtmessgerät</strong><small>Ausgangslauf, Prüfgewicht und Korrektur</small></span><span class="chevron" aria-hidden="true"></span></summary>
+      <div class="section-content">
+        <p>Das Messgerät erfasst Amplitude und Phase mit Drehzahlbezug. Die Änderung durch ein bekanntes Prüfgewicht liefert die Grundlage für Masse und Position der Korrektur. Der gemessene Phasenwinkel ist nicht direkt die Position der schweren Stelle.</p>
+        <ol class="run-timeline">
+          <li><span class="run-code">A0</span><div><h4>Ausgangslauf</h4><p>Drehzahl, 1×-Amplitude und Phase der benötigten Kanäle im vorgesehenen stabilen Betriebszustand aufnehmen. Vorhandene Gewichte dokumentieren.</p></div></li>
+          <li><span class="run-code">T</span><div><h4>Prüfgewichtslauf</h4><p>Bekannte Testmasse mit dokumentiertem Radius und Winkel anbringen. Anschließend unter vergleichbaren Bedingungen messen und die Änderung auswerten.</p></div></li>
+          <li class="calculation-step"><span class="calculation-dot" aria-hidden="true"></span><div><h4>Korrektur berechnen und umsetzen</h4><p>Prüfgewicht nach Berechnungsweise entfernen oder berücksichtigen. Zur tatsächlich montierten Masse gehört auch das Schweißgut.</p><button class="inline-link" data-calculator>Gewicht im Rechner vorbereiten <span aria-hidden="true">→</span></button></div></li>
+          <li><span class="run-code">K1</span><div><h4>Erster Korrekturlauf</h4><p>Alle festgelegten Kanäle erneut messen. Dieser Lauf ist zugleich die erste Kontrolle und kann bereits das Wuchtziel erreichen.</p></div></li>
+        </ol>
+        <div class="decision-grid">
+          <div><span class="decision-label">ZIEL ERREICHT</span><h4>Ergebnis dokumentieren</h4><p>Endgültige Gewichte und Messbedingungen festhalten. Freigabe nach Anlagenvorgabe.</p></div>
+          <div><span class="decision-label">NOCH NICHT ERREICHT</span><h4>Auswerten, ggf. K2 / K3</h4><p>Bei verwertbaren Daten eine Nachkorrektur berechnen und erneut kontrollieren. Bei instabiler Reaktion zuerst die Ursache klären.</p></div>
+        </div>
+        <p class="guide-note">Im einfachen Fall sind A0, T und K1 drei Messläufe; die Berechnung ist kein zusätzlicher Lauf. Bei zwei Korrekturebenen können weitere Prüfgewichtsläufe nötig sein. Zwei Lagerstellen bedeuten nicht automatisch zwei Korrekturebenen.</p>
+        <div class="information-strip"><strong>Bei Nachkorrekturen beachten</strong><p>Das Gerät kann eine zusätzliche Änderung oder einen neu herzustellenden Gesamtzustand ausgeben. Berechnete Massen nicht ungeprüft addieren; verbleibende und entfernte Gewichte dokumentieren.</p></div>
+      </div>
+    </details>
+
+    <details class="guide-section" id="method-b">
+      <summary><span class="section-symbol">B</span><span><strong>Ohne Phasenmessung</strong><small>Vier Messläufe und eine zusätzliche Kontrolle</small></span><span class="chevron" aria-hidden="true"></span></summary>
+      <div class="section-content">
+        <p>Ein Vierlaufverfahren kann in einem <strong>geeigneten Ein-Ebenen-Fall</strong> aus Amplitudenmessungen eine Korrektur bestimmen. Auch ohne Phasenmessung müssen die Daten geeignet und reproduzierbar sein.</p>
+        <div class="four-runs">
+          <div><span>1</span><strong>Ausgangslauf</strong><small>Ohne zusätzliches Prüfgewicht</small></div>
+          <div><span>2</span><strong>Prüflauf 0°</strong><small>Bekannte Masse und Radius</small></div>
+          <div><span>3</span><strong>Prüflauf 120°</strong><small>Dasselbe Gewicht umsetzen</small></div>
+          <div><span>4</span><strong>Prüflauf 240°</strong><small>Dasselbe Gewicht umsetzen</small></div>
+        </div>
+        <p>Masse und Radius bleiben gleich; jeweils nur eine Prüfposition ist belegt. Nach diesen vier Messläufen folgen <strong>Auswertung, Korrektur und ein zusätzlicher Kontrolllauf</strong>.</p>
+        <h4>Was dafür geklärt sein muss</h4>
+        <ul class="guide-list"><li>Geeigneter Ein-Ebenen-Fall und zugelassene Befestigungsstellen.</li><li>Gleiche Messstelle, Messrichtung, Amplitudendefinition und vergleichbare Betriebsbedingungen.</li><li>Ein verfügbarer 1×-Amplitudenwert erleichtert die Zuordnung. Ein breitbandiger Gesamtwert allein ist ohne Diagnose und Eignungsnachweis keine bestätigte Rechengrundlage.</li></ul>
+        <p class="guide-note">AS/NS und H/V getrennt beobachten. Das einfache Vierlaufverfahren ist keine allgemeine Zweiebenenlösung. Die Verfahrensbeschreibung berechnet keine Wuchtkorrektur aus Messwerten.</p>
+      </div>
+    </details>
+
+    <details class="guide-section warning-section" id="no-run">
+      <summary><span class="section-symbol">!</span><span><strong>Kein stabiler Wuchtlauf möglich</strong><small>Wenn die vorgesehene Drehzahl nicht erreicht wird</small></span><span class="chevron" aria-hidden="true"></span></summary>
+      <div class="section-content">
+        <p class="lead-warning">Wird die Messdrehzahl wegen hoher Schwingungen nicht erreicht, liegt noch kein gültiger Wuchtlauf für diesen Betriebszustand vor.</p>
+        <ol class="diagnostic-steps">
+          <li><h4>Lauf nach Anlagenvorgabe beenden</h4><p>Abbruch- und Schutzgrenzen einhalten. Hochlauf nicht erzwingen und Schutzabschaltungen nicht umgehen.</p></li>
+          <li><h4>Messdaten und Abbruchgrund sichern</h4><p>Erreichte Drehzahl, betroffene Kanäle, Verlauf, verfügbare Frequenz-/Phasendaten und Betriebsbedingungen dokumentieren. Der Lauf erhält den Status „abgebrochen“.</p></li>
+          <li><h4>Ursache fachlich prüfen</h4><p>Im gesicherten Stillstand unter anderem Ablagerungen, Verschleiß, Schäden, lose Befestigungen, Fundament und Lageraufstellung prüfen. Auch Ausrichtung, Schleifkontakt, Lagerzustand, Ölversorgung, Resonanzen, Strömung und Messaufbau kommen in Betracht.</p></li>
+          <li><h4>Weiteres Vorgehen festlegen</h4><p>Bestätigte Mängel beheben und Wuchtplan neu bewerten. Bei unklarer Ursache oder weiterhin unmöglichem Hochlauf Schwingungsdiagnostik, Hersteller oder qualifizierten Wuchtservice einbeziehen.</p></li>
+        </ol>
+        <div class="information-strip"><strong>Keine Korrektur aus unbrauchbaren Läufen</strong><p>Unvollständige oder nicht vergleichbare Messungen nicht wie gültige Wuchtläufe auswerten. Eine niedrigere Drehzahl ist kein automatischer Ersatz. Ein gesonderter Plan, Vorwuchten oder Werkstattwuchten muss anlagenspezifisch beurteilt werden.</p></div>
+      </div>
+    </details>
+
+    <details class="guide-section" id="measurement-basics">
+      <summary><span class="section-symbol subtle-symbol">i</span><span><strong>Messwerte richtig einordnen</strong><small>AS, NS, H/V und die Bedeutung von mm/s</small></span><span class="chevron" aria-hidden="true"></span></summary>
+      <div class="section-content">
+        <dl class="glossary"><div><dt>AS / NS</dt><dd>Antriebsseite und Nebenseite, jeweils mit eigener Messstellenkennzeichnung.</dd></div><div><dt>H / V</dt><dd>Horizontal und vertikal sind radiale Richtungen. Eine axiale Messung entlang der Welle ist davon getrennt.</dd></div><div><dt>mm/s</dt><dd>Schwinggeschwindigkeit. RMS/Spitze und Frequenzbereich festhalten; 1×-Anteil und breitbandiger Gesamtwert sind unterschiedliche Werte.</dd></div><div><dt>Gleitlager</dt><dd>Lagerzustand, Ölversorgung und verfügbare Temperaturen gehören zur Beurteilung. Aus „TD68“ allein werden keine Produktspezifikation oder Temperaturgrenzen abgeleitet.</dd></div><div><dt>Wuchtziel</dt><dd>Alle festgelegten Kanäle bewerten. Ein guter AS-Wert gleicht einen zu hohen NS-Wert nicht aus. Ein angezeigter Wert von 1,00 belegt die Unterschreitung von 1,00 mm/s nicht.</dd></div></dl>
+        <p class="guide-note">Hohe Schwingungen allein und auch ein hoher 1×-Anteil beweisen keine Unwucht. Alarm- und Abbruchgrenzen bleiben vom Wuchtziel getrennt.</p>
+      </div>
+    </details>
+
+    <details class="guide-section" id="diagram-comparison">
+      <summary><span class="section-symbol subtle-symbol">↗</span><span><strong>Beide Verfahren im Bild</strong><small>Messläufe und Korrekturen vergleichen</small></span><span class="chevron" aria-hidden="true"></span></summary>
+      <div class="section-content"><button class="image-open comparison-image" data-image="images/02-wuchtverfahren.png" data-caption="Messläufe und Korrektur" aria-label="Vergleich der Wuchtverfahren vergrößern"><img src="images/02-wuchtverfahren.png" width="1536" height="1024" loading="lazy" alt="Verfahrensvergleich: A mit Ausgangslauf, Prüfgewichtslauf und erstem Korrekturlauf sowie möglichen K2/K3; B mit Ausgangslauf und drei Prüfpositionen 0, 120 und 240 Grad, anschließend zusätzlicher Kontrolllauf."><span class="image-hint">⤢ Bild vergrößern</span></button></div>
+    </details>
+
+    <details class="guide-section" id="sources">
+      <summary><span class="section-symbol subtle-symbol">↗</span><span><strong>Quellen und Dokumentation</strong><small>Verfahrensgrundlagen und noch offene Angaben</small></span><span class="chevron" aria-hidden="true"></span></summary>
+      <div class="section-content">
+        <p>Die Erläuterungen stützen sich auf Herstellerunterlagen von SKF und PRÜFTECHNIK, die Beschreibung des Vierlaufverfahrens von Motionics sowie Diagnosehinweise von ASHRAE. Die Quellen bestätigen kein pauschales Ziel von 1 mm/s für alle Gebläse.</p>
+        <ul class="source-links"><li><a href="https://cdn.skfmediahub.skf.com/api/public/096aab407f043e44/pdf_preview_medium/SKF_Microlog_Analyzer_dBX_series_CMVA_90_User_Manual_Rev_F_pdf_preview_medium.pdf" target="_blank" rel="noopener noreferrer">SKF · Microlog dBX, Balancing Module ↗</a></li><li><a href="https://www.motionics.com/downloads/HowTo%20-%20Single-Plane%20Rotor%20Balancing%20with%20Single-Channel%20Four-Run%20Method.pdf" target="_blank" rel="noopener noreferrer">Motionics · Single-Channel Four-Run Method ↗</a></li><li><a href="https://skftechnicalsupport.zendesk.com/hc/en-us/articles/360022974074-Maintaining-Machinery-Balance-test-format-3-Word-import-via-Google-Drive" target="_blank" rel="noopener noreferrer">SKF · Maintaining Machinery Balance ↗</a></li><li><a href="https://handbook.ashrae.org/Handbooks/A15/SI/A15_CH38/a15_ch38_si.aspx" target="_blank" rel="noopener noreferrer">ASHRAE · Vibration Analysis ↗</a></li><li><a href="https://pruftechnik-dev.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/02/24194154/VIBXPERT_II_Balancer_manual_LIT53_203_122019_en.pdf" target="_blank" rel="noopener noreferrer">PRÜFTECHNIK · VIBXPERT II Balancer ↗</a></li></ul>
+        <a class="pdf-download" href="Erklaerungsentwurf.pdf" target="_blank" rel="noopener">Vollständigen PDF-Entwurf öffnen <span aria-hidden="true">↗</span></a>
+        <p class="guide-note">Noch offen sind Gerätetypen, Messwertdefinitionen, relevante Zielkanäle, Korrekturebenen, Winkelkonvention und anlagenspezifische Vorgaben. Die Erläuterungen ersetzen keine anlagenspezifische Arbeitsanweisung.</p>
+      </div>
+    </details>
+  </div>
+  <p class="guide-footer">Wuchtgewicht Rechner · v0.7.0<br>Prinzipskizzen und Verfahrensgrundlagen</p>
+</section>
+
+<dialog id="image-dialog" aria-labelledby="image-dialog-title">
+  <div class="dialog-top"><h2 id="image-dialog-title">Abbildung</h2><button id="image-close" class="secondary" autofocus aria-label="Vergrößerte Abbildung schließen">Schließen ×</button></div>
+  <img id="dialog-image" alt="">
+  <p>Prinzipschema · keine Montagezeichnung</p>
+</dialog>
+
     </main>
     <script src="model.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="guide.js" defer></script>
   </body>
 </html>

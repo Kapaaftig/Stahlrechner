@@ -1,8 +1,16 @@
-# Stahlgewicht Rechner · v0.6.1
+# Wuchtgewicht Rechner · v0.7.0
 
 Lokale, responsive Web-App zur Berechnung eines rechteckigen Werkstücks nach Zielgewicht. Ohne Laufzeitbibliotheken, Build-Schritt oder externe Ressourcen. Gewichtsmodell, Einheiten und Eingabeprüfung sind in `model.js`/`app.js` getrennt; Benutzerangaben verbleiben im Browser. Externe Quellen werden nur über ausdrücklich angeklickte Links geöffnet.
 
+Zwei getrennte Reiter: **Rechner** für die Gewichts- und Werkstückberechnung und **Wuchten verstehen** für die Verfahrensgrundlagen. Der Rechner ermittelt noch keine Wuchtkorrektur aus Schwingungsmessungen. Die spätere Schritt-für-Schritt-Eingabe für Variante A/B ist in [ROADMAP.md](ROADMAP.md) festgehalten und wird in dieser Version nicht implementiert.
+
+Die veröffentlichte Anwendung ist unter https://kapaaftig.github.io/Stahlrechner/ erreichbar. Der bestehende Repository-Name und der Seitenpfad bleiben trotz des neuen App-Namens erhalten.
+
 ## Versionshinweis
+
+v0.7.0 übernimmt die freigegebene Oberfläche mit zwei Reitern, zwei vergrößerbaren Prinzipskizzen und gezielt aufklappbaren Erklärungen. App-Name, PWA-Manifest und Kopiertext lauten jetzt „Wuchtgewicht Rechner“. Das kg-Symbol sowie die Gewichts-, Naht- und Verbrauchsmodelle bleiben erhalten.
+
+Einstellungen bestehender Installationen werden weiterhin aus demselben lokalen Speicherschlüssel gelesen; eine Neueingabe ist nicht erforderlich. Der Offline-Cache wird auf v0.7.0 aktualisiert und enthält auch Erklärungsbilder, Styles, Navigation und PDF. Nach Veröffentlichung bestehende Tabs neu laden und unten **v0.7.0** kontrollieren. Bereits installierte Startbildschirm-Verknüpfungen können den bisherigen Namen noch zwischenspeichern; deren Beschriftung wird vom Browser/Betriebssystem verwaltet.
 
 `0.6.0-preview.1` war ausschließlich ein Darstellungsentwurf ohne Automodus. Für Auto muss die Kopf-/Fußzeile der Anwendung mindestens v0.6.0 anzeigen. v0.6.1 korrigiert zusätzlich die Synchronisierung bei reinen change-Ereignissen und bei vom Browser wiederhergestellten Formularwerten. Es wird dabei nur der sichtbare Formularzustand neu berechnet; die zuletzt gewählte Auto-/Manuell-Einstellung wird nicht überschrieben.
 
@@ -22,6 +30,8 @@ Für das iPhone über HTTPS bereitstellen. `127.0.0.1` auf dem Telefon verweist 
 
 ## Bedienung
 
+### Rechner
+
 Gewünschtes Gesamtgewicht, Werkstoff, Dicke und Breite eingeben. Deutsche Dezimalkommas und Dezimalpunkte funktionieren ohne Tausendertrennzeichen; `1.234` bedeutet 1,234. Wissenschaftliche Schreibweise ist erlaubt. Werte werden standardmäßig mit zwei Nachkommastellen angezeigt; sehr kleine/große Ergebnisse verwenden Exponentialdarstellung.
 
 Die Schweißnahtfunktion bleibt beim Start ausgeschaltet. Sobald sie eingeschaltet wird, ist **Nahtlänge automatisch** vorausgewählt:
@@ -36,6 +46,20 @@ Die Schweißnahtfunktion bleibt beim Start ausgeschaltet. Sobald sie eingeschalt
 Miniatur und integrierte Detailansicht zeigen die Naht am **unteren Übergang zwischen Werkstück und Unterlage**. Nur die sichtbare Naht wird gezeichnet; die verdeckte Seite bleibt in der Masse enthalten. Die angedeutete Bodenfläche besitzt keine eigene Masse. Die Darstellung verwendet einen leicht konvexen Nahtkörper ohne Anspruch auf exakte reale Raupengeometrie. Bei Nahtmaß größer Werkstückdicke wird nur die Darstellung begrenzt; ein Hinweis benennt diese Abweichung. Werkstück und Naht sind schematisch und keine Fertigungszeichnung.
 
 Längenbemaßung blau, Breite türkis, Dicke orange. Alle drei verwenden denselben Zeichenstil. Antippen der Miniatur erweitert dieselbe Ergebniskarte.
+
+### Wuchten verstehen
+
+Der Reiterwechsel erhält die aktuellen Recheneingaben und Ergebnisse. Auswahlkarten öffnen den gewünschten Erklärungsabschnitt; weitere Abschnitte lassen sich unabhängig ein- und ausklappen. Die Reiter sind auch per Pfeiltasten sowie Pos1/Ende bedienbar. Bilder öffnen einen Dialog, der sich über „Schließen“ oder Escape beenden lässt.
+
+- **Variante A:** Amplitude und Phase, Ausgangslauf A0, Prüfgewichtslauf T und erster Korrektur-/Kontrolllauf K1; bei Bedarf K2/K3. Mehrere Korrekturebenen können zusätzliche Prüfläufe erfordern.
+- **Variante B:** Ein-Ebenen-Vierlaufprinzip ohne Phase, bestehend aus Ausgangslauf und drei Prüfpositionen 0°/120°/240°. Auswertung, Korrektur und zusätzlicher Kontrolllauf folgen danach; keine automatische Berechnung in v0.7.0.
+- **Kein stabiler Wuchtlauf:** Abbruch dokumentieren, Anlagen- und Messzustand prüfen und weiteres Vorgehen fachlich festlegen. Unbrauchbare oder nicht vergleichbare Messungen sind keine Grundlage einer Korrekturberechnung.
+- **Betriebliches Beispielziel unter 1,00 mm/s:** Messwertdefinition, Filter, relevante Kanäle und Betriebsbedingungen gehören dazu. Kein allgemeiner Grenzwert, keine Wuchtgüteklasse und keine automatische Betriebsfreigabe.
+- **Begriffe und Quellen:** AS = Antriebsseite, NS = Nebenseite; H/V radial getrennt. Der PDF-Erklärungsentwurf mit Laufblatt ist ebenfalls verlinkt.
+
+Direktlinks: `index.html#wuchten`, `index.html#rechner` und beispielsweise `index.html#no-run`. Das URL-Fragment stellt den gewählten Bereich nach einem Neuladen wieder her. Es speichert keine Messdaten. Die Erläuterungen ersetzen keine anlagenspezifische Arbeitsanweisung.
+
+Die Zusatzoberfläche bleibt in `guide.css` und `guide.js` getrennt von den bestehenden Berechnungsdateien. Das Schema zu Gleitlagern leitet aus „TD68“ keine Produktspezifikation oder Temperaturgrenze ab.
 
 ## Nahtmaß und Elektrode
 
@@ -106,4 +130,4 @@ Tests starten selbst lokale HTTP-Server auf 127.0.0.1. Unter Linux wird ein vorh
 
 [Testbericht](TESTBERICHT.md) · [Änderungen](CHANGELOG.md) · [Technische Quellen](QUELLEN.md). `preview.html` bleibt als Vergleichsseite mit manuellen Beispielen für die Darstellung verfügbar; sie ist nicht Bestandteil des Offline-Caches. Die aktuelle App enthält den produktiven Auto-Schalter.
 
-Der lokale ZIP-Export enthält Git-Historie einschließlich der Ausgangsversion und des freigegebenen Darstellungsentwurfs. Der über die GitHub-Weboberfläche importierte Repository-Verlauf ist davon unabhängig; dessen neue Änderungen werden als Pull Request bereitgestellt.
+Das Release-ZIP enthält die Projektdateien einschließlich Tests und Dokumentation, ohne `node_modules` und ohne lokale Git-Daten. Die Versionshistorie ist im GitHub-Repository nachvollziehbar. Ein Update des Repositorys erfolgt über einen gesonderten Release-Branch und Pull Request.
