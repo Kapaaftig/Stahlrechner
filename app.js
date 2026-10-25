@@ -520,7 +520,7 @@ $("reset").onclick = () => {
 $("copy").onclick = async () => {
   const r = calculate();
   if (!r.good) return;
-  const text = `Stahlgewicht Rechner v0.6.1\nMaterial: ${$("material").selectedOptions[0].textContent}\nGewicht: ${$("mass").value} ${prefs.units.mass}\nDicke: ${$("thick").value} ${prefs.units.thick}\nBreite: ${$("width").value} ${prefs.units.width}\nLänge: ${fmt(r.L / lf[prefs.units.length])} ${prefs.units.length}\nUmgerechnet: ${fmt(r.L / lf[prefs.units.secondary])} ${prefs.units.secondary}${$("weld").checked ? `\nNahtmodus: ${$("weldAuto").checked ? "Automatisch" : "Manuell"}\nGesamtnahtlänge: ${fmt(r.wl)} mm\nNahtmaß: ${$("weldSize").value} ${prefs.units.weldSize}\nNahtgewicht: ${fmt(r.weldKg * 1000)} g\nElektrode: ${$("electrodeSummary").textContent}\nVerbrauch: ${$("rodEstimate").textContent}\nAnnahmen: ${$("rodEstimateInfo").textContent}` : ""}`;
+  const text = `Wuchtgewicht Rechner v0.7.0\nMaterial: ${$("material").selectedOptions[0].textContent}\nGewicht: ${$("mass").value} ${prefs.units.mass}\nDicke: ${$("thick").value} ${prefs.units.thick}\nBreite: ${$("width").value} ${prefs.units.width}\nLänge: ${fmt(r.L / lf[prefs.units.length])} ${prefs.units.length}\nUmgerechnet: ${fmt(r.L / lf[prefs.units.secondary])} ${prefs.units.secondary}${$("weld").checked ? `\nNahtmodus: ${$("weldAuto").checked ? "Automatisch" : "Manuell"}\nGesamtnahtlänge: ${fmt(r.wl)} mm\nNahtmaß: ${$("weldSize").value} ${prefs.units.weldSize}\nNahtgewicht: ${fmt(r.weldKg * 1000)} g\nElektrode: ${$("electrodeSummary").textContent}\nVerbrauch: ${$("rodEstimate").textContent}\nAnnahmen: ${$("rodEstimateInfo").textContent}` : ""}`;
   try {
     await navigator.clipboard.writeText(text);
     $("copy").textContent = "✓ Kopiert";
@@ -546,7 +546,7 @@ $("coreDensity").value = String(prefs.coreDensity).replace(".", ",");
 syncRecovery();
 applyPrefs();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
-  navigator.serviceWorker.register("./sw.js").catch(() => {});
+  navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).catch(() => {});
 
 function updateWeldSymbol(size) {
   const fillet = $("weldType").value === "fillet";

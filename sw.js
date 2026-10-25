@@ -1,11 +1,16 @@
 "use strict";
-const CACHE = "stahlgewicht-v0.6.1";
+const CACHE = "stahlgewicht-v0.7.0";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./model.js",
+  "./guide.css",
+  "./guide.js",
+  "./images/01-messstellen-as-ns.png",
+  "./images/02-wuchtverfahren.png",
+  "./Erklaerungsentwurf.pdf",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-192.png",

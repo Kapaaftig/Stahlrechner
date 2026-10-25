@@ -1,6 +1,6 @@
 {
-  "name": "Stahlgewicht Rechner",
-  "short_name": "Stahlgewicht",
+  "name": "Wuchtgewicht Rechner",
+  "short_name": "Wuchtgewicht",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#edf1f7",
@@ -25,5 +25,6 @@
       "purpose": "any"
     }
   ],
-  "id": "./"
+  "id": "./",
+  "description": "Werkstücklänge für Wuchtgewichte berechnen und Betriebswuchten verstehen"
 }

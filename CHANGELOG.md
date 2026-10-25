@@ -1,5 +1,16 @@
 # Änderungsprotokoll
 
+## v0.7.0 – Wuchtgewicht Rechner und Verfahrensübersicht
+
+- Anwendung in „Wuchtgewicht Rechner“ umbenannt; kg-Symbol und bisheriger GitHub-Pages-Pfad bleiben erhalten.
+- Freigegebene Oberfläche mit getrennten Reitern „Rechner“ und „Wuchten verstehen“ übernommen. Recheneingaben bleiben beim Wechsel erhalten; Direktlinks und Tastaturbedienung ergänzt.
+- Aufklappbare Abschnitte zu Verfahren A/B, Messwertdefinitionen, Korrekturläufen K1/K2/K3 und nicht möglichem Wuchtlauf. Unter 1 mm/s bleibt ein betriebliches Beispielziel, kein allgemeiner Grenzwert.
+- Zwei vergrößerbare Prinzipskizzen, Quellen und PDF-Erklärungsentwurf mit Laufblatt eingebunden. Keine Original-Betriebsfotos veröffentlicht.
+- Bisherigen lokalen Speicherschlüssel und mathematische Modelle unverändert beibehalten. Manifest, Kopiertext, Cacheversion und Offline-Assetliste aktualisiert.
+- Produktidee eines späteren dritten Reiters „Wuchtlauf“ mit Schritt-für-Schritt-Eingabe für Variante A/B in ROADMAP.md festgehalten; noch keine neue automatische Wuchtberechnung.
+- Regressionstests um Reiter, Direktlinks, Bilddialoge, responsive Darstellung sowie ein Upgrade von v0.6.1 einschließlich Offline-Erklärungen und Erhalt der Einstellungen erweitert.
+- Prüfung: 7 Modelltests und 616 Browser-Assertions bestanden; zehn neue UI-Aufnahmen in beiden Farbschemata. Echte Windows-/iPhone-PWA-Abnahme bleibt manuell.
+
 ## v0.6.1 – Auto-Anzeige synchronisieren
 
 - Beide Umschaltrichtungen des Automodus berechnen beim change-Ereignis neu; das Feld bleibt nicht versehentlich bei manuellen 100 mm stehen.

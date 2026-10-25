@@ -280,7 +280,7 @@ const server = http.createServer((req, res) => {
     await page.click("#copy");
     assert.ok(
       (await page.evaluate(() => navigator.clipboard.readText())).includes(
-        "Stahlgewicht Rechner v0.6.1",
+        "Wuchtgewicht Rechner v0.7.0",
       ),
     );
     checks++;

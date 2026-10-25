@@ -1,4 +1,51 @@
-# Abschlussprüfung · v0.6.1
+# Abschlussprüfung · v0.7.0
+
+## Aktueller Prüfstand
+
+Ausgeführt mit Node.js, Playwright und dem vorhandenen Linux-Chromium über lokale HTTP-Server auf 127.0.0.1. Die vorherigen Tests wurden nach Integration der freigegebenen Oberfläche erneut ausgeführt. Der Rechenkern `model.js` bleibt gegenüber v0.6.1 bytegleich.
+
+| Suite | Ergebnis |
+|---|---|
+| Modelltests | 7 Tests bestanden |
+| Bisherige Browser-/Bedienprüfungen | 122 Assertions bestanden |
+| Nahtdarstellung | 291 Assertions bestanden |
+| Auto-Naht und Elektrodenverbrauch | 124 Assertions bestanden |
+| Sichtbare Auto-Synchronisierung | 23 Assertions bestanden |
+| Neue Reiter und Erklärungen | 40 Assertions bestanden |
+| Update von v0.6.1 und Offline-Erklärungen | 16 Assertions bestanden |
+| Gesamt | **7 Modelltests und 616 Browser-Assertions bestanden; keine erfassten JavaScript-Ausnahmen** |
+
+Der Gesamtlauf umfasst `npm run test:all`. Im neuen Upgrade-Test wurde nach dem ersten Lauf die Synchronisierung auf das tatsächliche `controllerchange`-Ereignis korrigiert und anschließend nur diese betroffene Suite erneut ausgeführt. Ein Cacheeintrag allein belegt noch nicht, dass der neue Worker den geöffneten Tab bereits übernommen hat. Die korrigierte Upgrade-Suite ist bestanden.
+
+### Neue Prüfungen für v0.7.0
+
+- Rechner standardmäßig sichtbar; Erklärungen und Rechnereinstellungen sind in den jeweils passenden Bereichen angeordnet.
+- Reiterwechsel erhält Eingabewerte und das berechnete Ergebnis; Tastaturnavigation und URL-Direktlinks funktionieren.
+- Auswahlkarten öffnen die richtigen Abschnitte. Beide Abbildungen laden, lassen sich vergrößern und mit Schaltfläche bzw. Escape schließen.
+- Kein horizontaler Dokumentüberlauf bei 320, 375, 390 und 1440 CSS-Pixeln in beiden Farbschemata und beiden Reitern.
+- Farbmodus und gewählter URL-Bereich nach Neuladen wiederhergestellt; bestehende Nahtautomatik und Maßansicht weiterhin bedienbar.
+- Ein Client mit dem tatsächlichen Service Worker aus v0.6.1 wechselt am selben Ursprung auf v0.7.0. Gespeicherte Einheiten, Material, Elektrodenstandard und Farbmodus bleiben erhalten.
+- Alter eigener Cache wird entfernt, ein fremder Cache bleibt bestehen. Nach Wechsel in den Offlinebetrieb funktionieren Neuladen, Rechner, Erklärungsbereich, beide Bilder und PDF.
+
+Die neuen `tests/guide.cjs` und `tests/upgrade.cjs` sind Bestandteil von `npm run test:all`. Der alte Worker liegt ausschließlich als klar benannte Testfixture unter `tests/fixtures/sw-v0.6.1.js`.
+
+### Visuelle Bewertung
+
+Der Testlauf erzeugte 80 Browseraufnahmen. Zehn aktuelle Aufnahmen der neuen Oberfläche liegen unter `screenshots/v0.7.0/`; ältere Aufnahmen in den übrigen Ordnern bleiben als historische Vergleichsartefakte erhalten. Die vollständigen frisch erzeugten Aufnahmen sind zusätzlich im separaten lokalen Prüfpaket gesichert.
+
+Die aktuelle Smartphone-Rechneransicht im Hellmodus und der Erklärungsbereich im Dunkelmodus wurden visuell angesehen; die Desktop- und Mobilgestaltung entsprechen dem zuvor freigegebenen Entwurf. Keine erkennbar abgeschnittenen Bedienelemente; Rechner und Wissen sind klar getrennt. Auf kleinen Displays sind die Diagrammtexte in der Übersicht klein, deshalb ist die Vergrößerung vorgesehen. Der Erklärungsbereich ist bei mehreren gleichzeitig geöffneten Abschnitten lang; sie bleiben gezielt einzeln aufklappbar.
+
+Zusätzlich: Syntaxprüfung von `app.js`, `guide.js`, `sw.js` und neuen Testdateien sowie `git diff --check` ohne Befund.
+
+### Verbleibende manuelle Abnahme
+
+- Echtes Windows/Edge und iPhone/Safari, insbesondere PWA-Installation, Betriebssystembeschriftung und Offlineverhalten eines tatsächlich installierten Clients.
+- Fachliche Abnahme als anlagenspezifische Arbeitsanweisung ist nicht erfolgt. Das Beispielziel unter 1 mm/s ersetzt keine Anlagenfreigabe.
+- Eine schrittweise Wuchtauswertung für Verfahren A/B ist in ROADMAP.md vorgemerkt und in dieser Version nicht implementiert.
+
+## Historischer Prüfstand v0.6.1
+
+Die folgenden Einträge dokumentieren frühere Versionen und werden nicht als zusätzliche Tests der v0.7.0 gezählt.
 
 Die vom Nutzer tatsächlich getestete Fassung war laut Rückmeldung **v0.6.0-preview.1 über index.html**. Diese Vorschau hatte noch keinen Automodus; die unverändert manuelle Gesamtnahtlänge von 100 mm war dort erwartbar. Das ursprüngliche ZIP v0.6.0 wurde zusätzlich geprüft: app.js, model.js, index.html und sw.js stimmten bytegenau mit dem veröffentlichten PR-Stand überein.
 
